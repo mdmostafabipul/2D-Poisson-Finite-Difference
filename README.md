@@ -1,57 +1,216 @@
-# Project 2: 2D Poisson Equation Using Finite Differences
+# 2D Poisson Equation Using Finite Differences
 
-This project solves a two-dimensional Poisson equation on the unit square using the standard five-point finite difference method.
+This project solves a two-dimensional Poisson equation on the unit square using the standard five-point finite difference method in MATLAB. The numerical solution is compared with a known exact solution, and the project also examines grid convergence, computational cost, and the sparsity structure of the resulting linear system.
 
-## Model problem
+## Mathematical Model
+
+The problem is
 
 \[
 -\Delta u = f
 \]
 
-on
+on the unit square
 
 \[
-(0,1)\times(0,1),
+\Omega=(0,1)\times(0,1),
 \]
 
-with zero Dirichlet boundary conditions.
+with homogeneous Dirichlet boundary conditions
+
+\[
+u=0 \qquad \text{on } \partial\Omega.
+\]
 
 The exact solution is chosen as
 
 \[
-u(x,y)=\sin(\pi x)\sin(\pi y),
+u(x,y)=\sin(\pi x)\sin(\pi y).
 \]
 
-which gives
+Therefore,
 
 \[
 f(x,y)=2\pi^2\sin(\pi x)\sin(\pi y).
 \]
 
-## Main numerical ideas
+Using a known exact solution makes it possible to directly measure the numerical error.
 
-- 2D Cartesian grid
-- five-point finite difference stencil
-- sparse matrix assembly
-- solution of a sparse linear system
-- comparison with an exact solution
-- grid-refinement and convergence study
+---
 
-## Files
+## Numerical Method
 
-- `main_poisson2d.m` — main simulation and visualization
-- `poisson2d_fd.m` — sparse finite-difference solver
-- `convergence_poisson2d.m` — convergence and runtime study
-- `DAY4_NOTES.md` — Day 4 derivation and checklist
+The Laplacian is approximated at an interior grid point using the five-point stencil,
 
-## Day 4
+\[
+-\Delta u(x_i,y_j)
+\approx
+\frac{
+4u_{i,j}
+-u_{i+1,j}
+-u_{i-1,j}
+-u_{i,j+1}
+-u_{i,j-1}
+}{h^2}.
+\]
 
-Run:
+After applying this approximation at all interior grid points, the PDE is converted into a sparse linear system
+
+\[
+A\mathbf{u}=\mathbf{b}.
+\]
+
+The system is assembled using MATLAB sparse matrices and solved with MATLAB's backslash operator.
+
+---
+
+## Numerical Solution
+
+For \(N=41\), the grid contains \(39\times39=1521\) interior unknowns.
+
+The numerical solution closely matches the exact solution.
+
+![Numerical Solution](Results/numerical_solution_N41.png)
+
+![Exact Solution](Results/exact_solution_N41.png)
+
+The pointwise absolute error is shown below.
+
+![Pointwise Error](Results/error_N41.png)
+
+A cross-section at \(y=0.5\) also shows close agreement between the numerical and exact solutions.
+
+![Cross Section](Results/cross_section_N41.png)
+
+---
+
+## Grid Convergence Study
+
+The grid was refined from \(N=11\) to \(N=161\).
+
+| N | h | Unknowns | L-infinity Error | Observed Order |
+|---:|---:|---:|---:|---:|
+| 11 | 0.10000 | 81 | 8.2654e-03 | — |
+| 21 | 0.05000 | 361 | 2.0587e-03 | 2.0053 |
+| 41 | 0.02500 | 1521 | 5.1420e-04 | 2.0013 |
+| 81 | 0.01250 | 6241 | 1.2852e-04 | 2.0003 |
+| 161 | 0.00625 | 25281 | 3.2128e-05 | 2.0001 |
+
+The observed convergence rate approaches
+
+\[
+p\approx2,
+\]
+
+which is consistent with the expected second-order accuracy of the five-point finite difference approximation.
+
+![Grid Convergence](Results/convergence.png)
+
+---
+
+## Computational Cost
+
+To obtain a more stable runtime measurement, each grid size was solved 10 times and the average runtime was recorded.
+
+| N | Unknowns | Average Runtime (s) |
+|---:|---:|---:|
+| 11 | 81 | 5.1040e-04 |
+| 21 | 361 | 3.5010e-04 |
+| 41 | 1521 | 1.2317e-03 |
+| 81 | 6241 | 5.9271e-03 |
+| 161 | 25281 | 2.91851e-02 |
+
+For very small systems, timing is affected by MATLAB overhead and other small timing variations. For the larger systems, the increase in computational cost becomes clear as the number of unknowns grows.
+
+![Runtime](Results/runtime.png)
+
+---
+
+## Sparse Matrix Structure
+
+The finite difference discretization produces a sparse matrix because each interior grid point is coupled only to itself and its neighboring grid points.
+
+For \(N=41\),
+
+- number of unknowns: 1521
+- entries in a corresponding dense matrix: 2,313,441
+- nonzero entries in the sparse matrix: 7,449
+
+The sparsity pattern is shown below.
+
+![Sparsity Pattern](Results/sparsity_pattern.png)
+
+This illustrates why sparse matrix storage is important when solving larger PDE systems.
+
+---
+
+## Project Files
+
+```text
+2D-Poisson-Finite-Difference/
+│
+├── main_poisson2d.m
+├── poisson2d_fd.m
+├── convergence_poisson2d.m
+├── README.md
+│
+├── Results/
+│   ├── numerical_solution_N41.png
+│   ├── exact_solution_N41.png
+│   ├── error_N41.png
+│   ├── cross_section_N41.png
+│   ├── numerical_solution_N81.png
+│   ├── exact_solution_N81.png
+│   ├── error_N81.png
+│   ├── cross_section_N81.png
+│   ├── convergence.png
+│   ├── runtime.png
+│   └── sparsity_pattern.png
+│
+└── Report/
+    └── Poisson_2D_Finite_Difference_Report.pdf
+```
+
+## How to Run
+
+Open the project folder in MATLAB.
+
+Run the main numerical experiment with
 
 ```matlab
 main_poisson2d
 ```
 
-Start with `N = 41`, inspect the numerical solution and error, then repeat with `N = 81`.
+Run the grid convergence and runtime study with
 
-Do not run the full convergence study until the main solver and five-point stencil are understood.
+```matlab
+convergence_poisson2d
+```
+
+The grid size can be changed by modifying `N` in `main_poisson2d.m`.
+
+---
+
+## Main Results
+
+The main observations from this project are:
+
+- the finite difference solution agrees closely with the analytical solution;
+- grid refinement gives an observed convergence rate very close to second order;
+- the number of unknowns grows rapidly as the two-dimensional grid is refined;
+- computational time increases noticeably for larger systems;
+- the five-point discretization produces a highly sparse linear system.
+
+---
+
+## Software
+
+MATLAB
+
+---
+
+## Author
+
+**Md Mostafa**  
+Ph.D. Student in Mathematics  
+University of North Texas
