@@ -1,38 +1,40 @@
 # 2D Poisson Equation Using Finite Differences
 
-This project solves a two-dimensional Poisson equation on the unit square using the standard five-point finite difference method in MATLAB. The numerical solution is compared with a known exact solution, and the project also examines grid convergence, computational cost, and the sparsity structure of the resulting linear system.
+This project solves a two-dimensional Poisson equation on the unit square using the standard five-point finite difference method in MATLAB. The numerical solution is compared with a known exact solution, and the project also studies grid convergence, computational cost, and the sparsity structure of the resulting linear system.
+
+---
 
 ## Mathematical Model
 
 The problem is
 
-\[
+$$
 -\Delta u = f
-\]
+$$
 
 on the unit square
 
-\[
-\Omega=(0,1)\times(0,1),
-\]
+$$
+\Omega = (0,1)\times(0,1),
+$$
 
 with homogeneous Dirichlet boundary conditions
 
-\[
-u=0 \qquad \text{on } \partial\Omega.
-\]
+$$
+u = 0 \qquad \text{on } \partial\Omega.
+$$
 
 The exact solution is chosen as
 
-\[
-u(x,y)=\sin(\pi x)\sin(\pi y).
-\]
+$$
+u(x,y) = \sin(\pi x)\sin(\pi y).
+$$
 
 Therefore,
 
-\[
-f(x,y)=2\pi^2\sin(\pi x)\sin(\pi y).
-\]
+$$
+f(x,y) = 2\pi^2 \sin(\pi x)\sin(\pi y).
+$$
 
 Using a known exact solution makes it possible to directly measure the numerical error.
 
@@ -40,25 +42,29 @@ Using a known exact solution makes it possible to directly measure the numerical
 
 ## Numerical Method
 
-The Laplacian is approximated at an interior grid point using the five-point stencil,
+The Laplacian is approximated at an interior grid point using the five-point stencil:
 
-\[
+$$
 -\Delta u(x_i,y_j)
 \approx
 \frac{
 4u_{i,j}
--u_{i+1,j}
--u_{i-1,j}
--u_{i,j+1}
--u_{i,j-1}
+-
+u_{i+1,j}
+-
+u_{i-1,j}
+-
+u_{i,j+1}
+-
+u_{i,j-1}
 }{h^2}.
-\]
+$$
 
-After applying this approximation at all interior grid points, the PDE is converted into a sparse linear system
+Applying this approximation at all interior grid points converts the PDE into a sparse linear system
 
-\[
-A\mathbf{u}=\mathbf{b}.
-\]
+$$
+A\mathbf{u} = \mathbf{b}.
+$$
 
 The system is assembled using MATLAB sparse matrices and solved with MATLAB's backslash operator.
 
@@ -66,27 +72,27 @@ The system is assembled using MATLAB sparse matrices and solved with MATLAB's ba
 
 ## Numerical Solution
 
-For \(N=41\), the grid contains \(39\times39=1521\) interior unknowns.
+For $N=41$, the grid contains $39\times39 = 1521$ interior unknowns.
 
 The numerical solution closely matches the exact solution.
 
-![Numerical Solution](Results/numerical_solution_N41.png)
+![Numerical Solution](results/numerical_solution_N41.png)
 
-![Exact Solution](Results/exact_solution_N41.png)
+![Exact Solution](results/exact_solution_N41.png)
 
 The pointwise absolute error is shown below.
 
-![Pointwise Error](Results/error_N41.png)
+![Pointwise Error](results/error_N41.png)
 
-A cross-section at \(y=0.5\) also shows close agreement between the numerical and exact solutions.
+A cross-section at $y=0.5$ also shows close agreement between the numerical and exact solutions.
 
-![Cross Section](Results/cross_section_N41.png)
+![Cross Section](results/cross_section_N41.png)
 
 ---
 
 ## Grid Convergence Study
 
-The grid was refined from \(N=11\) to \(N=161\).
+The grid was refined from $N=11$ to $N=161$.
 
 | N | h | Unknowns | L-infinity Error | Observed Order |
 |---:|---:|---:|---:|---:|
@@ -98,19 +104,19 @@ The grid was refined from \(N=11\) to \(N=161\).
 
 The observed convergence rate approaches
 
-\[
-p\approx2,
-\]
+$$
+p \approx 2,
+$$
 
 which is consistent with the expected second-order accuracy of the five-point finite difference approximation.
 
-![Grid Convergence](Results/convergence.png)
+![Grid Convergence](results/convergence.png)
 
 ---
 
 ## Computational Cost
 
-To obtain a more stable runtime measurement, each grid size was solved 10 times and the average runtime was recorded.
+To obtain a more stable timing measurement, each grid size was solved 10 times and the average runtime was recorded.
 
 | N | Unknowns | Average Runtime (s) |
 |---:|---:|---:|
@@ -120,9 +126,9 @@ To obtain a more stable runtime measurement, each grid size was solved 10 times 
 | 81 | 6241 | 5.9271e-03 |
 | 161 | 25281 | 2.91851e-02 |
 
-For very small systems, timing is affected by MATLAB overhead and other small timing variations. For the larger systems, the increase in computational cost becomes clear as the number of unknowns grows.
+For very small systems, timing is affected by MATLAB overhead and other small variations. For the larger systems, the increase in computational cost becomes clear as the number of unknowns grows.
 
-![Runtime](Results/runtime.png)
+![Runtime](results/runtime.png)
 
 ---
 
@@ -130,7 +136,7 @@ For very small systems, timing is affected by MATLAB overhead and other small ti
 
 The finite difference discretization produces a sparse matrix because each interior grid point is coupled only to itself and its neighboring grid points.
 
-For \(N=41\),
+For $N=41$:
 
 - number of unknowns: 1521
 - entries in a corresponding dense matrix: 2,313,441
@@ -138,7 +144,7 @@ For \(N=41\),
 
 The sparsity pattern is shown below.
 
-![Sparsity Pattern](Results/sparsity_pattern.png)
+![Sparsity Pattern](results/sparsity_pattern.png)
 
 This illustrates why sparse matrix storage is important when solving larger PDE systems.
 
@@ -154,7 +160,7 @@ This illustrates why sparse matrix storage is important when solving larger PDE 
 ├── convergence_poisson2d.m
 ├── README.md
 │
-├── Results/
+├── results/
 │   ├── numerical_solution_N41.png
 │   ├── exact_solution_N41.png
 │   ├── error_N41.png
@@ -167,9 +173,11 @@ This illustrates why sparse matrix storage is important when solving larger PDE 
 │   ├── runtime.png
 │   └── sparsity_pattern.png
 │
-└── Report/
+└── report/
     └── Poisson_2D_Finite_Difference_Report.pdf
 ```
+
+---
 
 ## How to Run
 
@@ -206,6 +214,16 @@ The main observations from this project are:
 ## Software
 
 MATLAB
+
+---
+
+## Report
+
+A short report for this project is included in:
+
+```text
+report/Poisson_2D_Finite_Difference_Report.pdf
+```
 
 ---
 
